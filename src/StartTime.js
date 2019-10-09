@@ -9,7 +9,7 @@ const StyledInput = styled.input`
     width: 80px;
 `
 
-class StartTimeForm extends React.Component {
+class StartTime extends React.Component {
     updateTime = val => {
         const { updateTime } = this.props
 
@@ -33,4 +33,4 @@ class StartTimeForm extends React.Component {
     }
 }
 
-export default StartTimeForm
+export default StartTime
