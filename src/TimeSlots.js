@@ -60,7 +60,7 @@ const TimeSlotItem = SortableElement(({ timeslot, i, callWithRow, updateTime, up
     )
 })
 
-const SortableList = SortableContainer(props => (
+const TimeSlotList = SortableContainer(props => (
     <Wrapper>
         {props.slots.map((timeslot, index) => (
             <TimeSlotItem {...props} key={`item-${timeslot.id}`} timeslot={timeslot} index={index} i={index} />
@@ -68,7 +68,7 @@ const SortableList = SortableContainer(props => (
     </Wrapper>
 ))
 
-class TimeSlotList extends React.Component {
+class TimeSlots extends React.Component {
     callWithRow = (row, callback) => evt => {
         callback(row, evt.target.value)
     }
@@ -80,8 +80,8 @@ class TimeSlotList extends React.Component {
     }
 
     render() {
-        return <SortableList onSortEnd={this.onSortEnd} callWithRow={this.callWithRow} {...this.props} />
+        return <TimeSlotList onSortEnd={this.onSortEnd} callWithRow={this.callWithRow} {...this.props} />
     }
 }
 
-export default TimeSlotList
+export default TimeSlots
