@@ -1,4 +1,4 @@
-# Agenda Creator
+# [Agenda Creator](https://agenda-creator.netlify.com)
 
 A simple web app to generate agendas and itineraries
 
