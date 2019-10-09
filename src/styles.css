@@ -1,0 +1,38 @@
+body {
+    /* Bottom padding is to avoid displaying the Mobile Safari chrome when tapping near the end of the page */
+    padding: 1em 1em 5em 1em;
+}
+
+h2 {
+    margin-top: 0.5em;
+    font-size: 1.5em;
+}
+
+.btn {
+    margin-right: 1em;
+}
+
+.container {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: none;
+}
+
+.timeslot-item {
+    position: relative;
+    padding-left: 18px;
+}
+
+.timeslot-item::before {
+    content: '⋮⋮';
+    letter-spacing: -11px;
+    text-shadow: 1px 1px 0 #ddd;
+    line-height: 34px;
+    text-align: center;
+    display: inline-block;
+    height: 100%;
+    width: 20px;
+    position: absolute;
+    left: 0;
+    cursor: move;
+}
