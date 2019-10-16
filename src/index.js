@@ -3,9 +3,10 @@ import ReactDOM from 'react-dom'
 import moment from 'moment'
 import arrayMove from 'array-move'
 
-import TimeSlotList from './TimeSlotList.js'
+import TimeSlots from './TimeSlots.js'
 import Result from './Result.js'
-import StartTimeForm from './StartTimeForm.js'
+import StartTime from './StartTime.js'
+
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import './styles.css'
 
@@ -90,6 +91,8 @@ class App extends React.Component {
         return `${hoursText}, ${minsText}`
     }
 
+    getEndTimeText = end => `-${end.format('HH:mm')}`
+
     // Arguments are optional
     getResults = (slots, prefs) => {
         if (!slots) {
@@ -103,7 +106,6 @@ class App extends React.Component {
         const { start } = this.state
         const { duration: showDuration, time: showTime } = prefs
         const startTime = moment(`2000-01-01T${start ? start : '09:00'}:00`)
-        const getEndTimeText = end => `-${end.format('HH:mm')}`
 
         const results = []
         let elapsed = 0
@@ -117,18 +119,23 @@ class App extends React.Component {
             // Alter the text based on prefs
             // Only show the end time if it's different than the begin time
             if (showDuration && showTime) {
-                text = `${begin.format('HH:mm')}${entry.time > 0 ? getEndTimeText(end) : '    '} (${this.minToHourMin(
+                text = `${begin.format('HH:mm')}${entry.time > 0 ? this.getEndTimeText(end) : ''} (${this.minToHourMin(
                     entry.time,
                 )}) ${entry.desc}`
             } else if (showDuration) {
                 text = `${this.minToHourMin(entry.time)} — ${entry.desc}`
             } else if (showTime) {
-                text = `${begin.format('HH:mm')}${entry.time > 0 ? getEndTimeText(end) : '    '} ${entry.desc}`
+                text = `${begin.format('HH:mm')}${entry.time > 0 ? this.getEndTimeText(end) : ''} ${entry.desc}`
             }
 
             results.push({
                 text,
                 key,
+                // For Confluence output:
+                begin,
+                end,
+                desc: entry.desc,
+                time: entry.time,
             })
 
             elapsed += entry.time
@@ -138,6 +145,43 @@ class App extends React.Component {
     }
 
     getResultsAsText = results => results.map(result => result.text).join('\n')
+
+    getResultsAsConfluence = results => {
+        const {
+            prefs: { duration: showDuration, time: showTime },
+        } = this.state
+        let headerRow = '||'
+
+        if (showTime) {
+            headerRow += 'Time||'
+        }
+
+        if (showDuration) {
+            headerRow += 'Duration||'
+        }
+
+        headerRow += 'Description||Person||'
+
+        let bodyRows = []
+
+        results.forEach(result => {
+            let rowText = '|'
+
+            if (showTime) {
+                rowText += `${result.begin.format('HH:mm')}${result.time > 0 ? this.getEndTimeText(result.end) : ''}|`
+            }
+
+            if (showDuration) {
+                rowText += `${this.minToHourMin(result.time)}|`
+            }
+
+            rowText += `${result.desc ? result.desc : ' '}|`
+
+            bodyRows.push(rowText)
+        })
+
+        return `${headerRow}\n${bodyRows.join('\n')}`
+    }
 
     updateStartTime = val => {
         const newState = {
@@ -259,11 +303,11 @@ class App extends React.Component {
                 </p>
 
                 <h2>Start Time</h2>
-                <StartTimeForm time={start} updateTime={this.updateStartTime} />
+                <StartTime time={start} updateTime={this.updateStartTime} />
 
                 <h2>Time Slots</h2>
                 <p>Enter the length of each time slot in minutes. Drag and drop to reorder them.</p>
-                <TimeSlotList
+                <TimeSlots
                     slots={slots}
                     updateTime={this.updateSlotTime}
                     updateDesc={this.updateSlotDesc}
@@ -278,11 +322,11 @@ class App extends React.Component {
                 <button type="button" className="btn btn-primary" onClick={this.addSlot}>
                     Add time slot
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={this.addBreak}>
+                <button type="button" className="btn btn-outline-primary" onClick={this.addBreak}>
                     Add break
                 </button>
 
-                <h2>Result</h2>
+                <h2 className="mt-4">Result</h2>
                 <Result start={start} results={results} />
 
                 <div className="container" style={{ marginBottom: '1em' }}>
@@ -317,12 +361,19 @@ class App extends React.Component {
                 </div>
                 <button
                     type="button"
-                    className="btn btn-outline-secondary"
+                    className="btn btn-success"
                     onClick={() => this.copyToClipboard(this.getResultsAsText(results))}
                 >
-                    Copy agenda text
+                    Copy as plain text (Outlook)
                 </button>
-                <button type="button" className="btn btn-outline-secondary" onClick={this.copyUrl}>
+                <button
+                    type="button"
+                    className="btn btn-success"
+                    onClick={() => this.copyToClipboard(this.getResultsAsConfluence(results))}
+                >
+                    Copy as Confluence table
+                </button>
+                <button type="button" className="btn btn-outline-success" onClick={this.copyUrl}>
                     Copy link
                 </button>
             </div>
