@@ -368,7 +368,7 @@ class App extends React.Component {
                 </button>
                 <button
                     type="button"
-                    className="btn btn-success"
+                    className="btn btn-secondary"
                     onClick={() => this.copyToClipboard(this.getResultsAsConfluence(results))}
                 >
                     Copy as Confluence table
