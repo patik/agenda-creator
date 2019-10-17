@@ -36,7 +36,16 @@ class App extends React.Component {
 
     applyHash = hash => {
         try {
-            const { slots, start } = JSON.parse(atob(hash))
+            let decodedHash = ''
+
+            // Newer URLs are base64 encoded
+            try {
+                decodedHash = atob(hash)
+            } catch (e) {
+                decodedHash = hash
+            }
+
+            const { slots, start } = JSON.parse(decodedHash)
             const newState = { ...this.state, slots, start }
 
             this.setState(newState)
