@@ -41,7 +41,7 @@ class App extends React.Component {
 
             this.setState(newState)
         } catch (e) {
-            console.error('Applying the hash failed with error ', e)
+            console.error('Applying the hash failed with error ', e, '\nCurrent state: ', { ...this.state })
         }
     }
 
@@ -68,7 +68,7 @@ class App extends React.Component {
 
             this.copyToClipboard(url)
         } catch (e) {
-            console.error('Copying URL to clipboard failed with error ', e)
+            console.error('Copying URL to clipboard failed with error ', e, '\nCurrent state: ', { ...this.state })
         }
     }
 
@@ -207,6 +207,7 @@ class App extends React.Component {
             ...this.state,
         }
 
+        console.log(`Setting slots[${row}].${name} to ${val}`)
         newState.slots[row][name] = val
 
         const { results, elapsed } = this.getResults()
@@ -323,7 +324,8 @@ class App extends React.Component {
 
                 <p>Total: {this.minToHourMin(elapsed)}</p>
 
-                <button type="button" className="btn btn-primary" onClick={this.addSlot}>
+                {/* Here we need to call addSlot like this so we don't pass the click event to it as an argument */}
+                <button type="button" className="btn btn-primary" onClick={() => this.addSlot()}>
                     Add time slot
                 </button>
                 <button type="button" className="btn btn-outline-primary" onClick={this.addBreak}>
