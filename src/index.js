@@ -40,7 +40,9 @@ class App extends React.Component {
             const newState = { ...this.state, slots, start }
 
             this.setState(newState)
-        } catch (e) {}
+        } catch (e) {
+            console.error('Applying the hash failed with error ', e)
+        }
     }
 
     copyToClipboard = str => {
@@ -65,7 +67,9 @@ class App extends React.Component {
             const url = `${window.location.origin}/#${encodeURIComponent(JSON.stringify(slimState))}`
 
             this.copyToClipboard(url)
-        } catch (e) {}
+        } catch (e) {
+            console.error('Copying URL to clipboard failed with error ', e)
+        }
     }
 
     minToHourMin = total => {
