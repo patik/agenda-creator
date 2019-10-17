@@ -36,21 +36,19 @@ class App extends React.Component {
 
     applyHash = hash => {
         try {
-            let decodedHash = ''
-
-            // Newer URLs are base64 encoded
-            try {
-                decodedHash = atob(hash)
-            } catch (e) {
-                decodedHash = hash
-            }
-
-            const { slots, start } = JSON.parse(decodedHash)
+            const { slots, start } = JSON.parse(hash)
             const newState = { ...this.state, slots, start }
+
+            // Re-add the data that was left out of the URL
+            newState.slots.map(slot => ({
+                id: getRandomInt(),
+            }))
 
             this.setState(newState)
         } catch (e) {
-            console.error('Applying the hash failed with error ', e, '\nCurrent state: ', { ...this.state })
+            if (window.debugAgendaCreator) {
+                console.error('Applying the hash failed with error ', e, '\nCurrent state: ', { ...this.state })
+            }
         }
     }
 
@@ -73,11 +71,19 @@ class App extends React.Component {
                 start: this.state.start,
             }
 
-            const url = `${window.location.origin}/#${encodeURIComponent(btoa(JSON.stringify(slimState)))}`
+            // Only keep the data we need (e.g. no IDs)
+            slimState.slots.map(slot => ({
+                time: slot.time,
+                desc: slot.desc,
+            }))
+
+            const url = `${window.location.origin}/#${encodeURIComponent(JSON.stringify(slimState))}`
 
             this.copyToClipboard(url)
         } catch (e) {
-            console.error('Copying URL to clipboard failed with error ', e, '\nCurrent state: ', { ...this.state })
+            if (window.debugAgendaCreator) {
+                console.error('Copying URL to clipboard failed with error ', e, '\nCurrent state: ', { ...this.state })
+            }
         }
     }
 
@@ -216,7 +222,10 @@ class App extends React.Component {
             ...this.state,
         }
 
-        console.log(`Setting slots[${row}].${name} to ${val}`)
+        if (window.debugAgendaCreator) {
+            console.log(`Updating slots[${row}].${name} from ${newState.slots[row][name]} to ${val}`)
+        }
+
         newState.slots[row][name] = val
 
         const { results, elapsed } = this.getResults()
