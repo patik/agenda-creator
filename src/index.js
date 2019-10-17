@@ -36,7 +36,7 @@ class App extends React.Component {
 
     applyHash = hash => {
         try {
-            const { slots, start } = JSON.parse(hash)
+            const { slots, start } = JSON.parse(atob(hash))
             const newState = { ...this.state, slots, start }
 
             this.setState(newState)
@@ -64,7 +64,7 @@ class App extends React.Component {
                 start: this.state.start,
             }
 
-            const url = `${window.location.origin}/#${encodeURIComponent(JSON.stringify(slimState))}`
+            const url = `${window.location.origin}/#${encodeURIComponent(btoa(JSON.stringify(slimState)))}`
 
             this.copyToClipboard(url)
         } catch (e) {
