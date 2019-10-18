@@ -13,6 +13,11 @@ const NumberInput = styled.input`
     max-width: 5em;
 `
 
+const DescriptionColumn = styled.div`
+    /* Override .col-auto */
+    flex-grow: 1 !important;
+`
+
 const DescInput = styled.input``
 
 const TimeSlotItem = SortableElement(({ timeslot, i, callWithRow, updateTime, updateDesc, removeSlot, addSlot }) => {
@@ -37,7 +42,7 @@ const TimeSlotItem = SortableElement(({ timeslot, i, callWithRow, updateTime, up
                     step="5"
                 />
             </div>
-            <div className="col-auto">
+            <DescriptionColumn className="col-auto">
                 <Label className="sr-only" htmlFor={`${timeslot.id}_desc`}>
                     Description
                 </Label>
@@ -50,7 +55,7 @@ const TimeSlotItem = SortableElement(({ timeslot, i, callWithRow, updateTime, up
                     value={timeslot.desc}
                     placeholder="Description"
                 />
-            </div>
+            </DescriptionColumn>
             <div className="col-auto">
                 <button className="btn btn-outline-danger btn-sm mb-2" type="button" onClick={() => removeSlot(i)}>
                     Remove
