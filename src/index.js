@@ -1,3 +1,4 @@
+/* global ga: true */
 import * as React from 'react'
 import ReactDOM from 'react-dom'
 import moment from 'moment'
@@ -45,6 +46,7 @@ class App extends React.Component {
             }))
 
             this.setState(newState)
+            ga('send', 'event', 'hash', 'applied')
         } catch (e) {
             if (window.debugAgendaCreator) {
                 console.error('Applying the hash failed with error ', e, '\nCurrent state: ', { ...this.state })
@@ -80,6 +82,7 @@ class App extends React.Component {
             const url = `${window.location.origin}/#${encodeURIComponent(JSON.stringify(slimState))}`
 
             this.copyToClipboard(url)
+            ga('send', 'event', 'button', 'click', 'copy_url')
         } catch (e) {
             if (window.debugAgendaCreator) {
                 console.error('Copying URL to clipboard failed with error ', e, '\nCurrent state: ', { ...this.state })
@@ -244,7 +247,7 @@ class App extends React.Component {
         this.updateSlotValue(row, 'desc', val)
     }
 
-    addSlot = (entry = {}) => {
+    addSlot = (entry = {}, doNotTrack = false) => {
         const newState = {
             ...this.state,
         }
@@ -268,6 +271,14 @@ class App extends React.Component {
         newState.elapsed = elapsed
 
         this.setState(newState)
+
+        if (!doNotTrack) {
+            try {
+                ga('send', 'event', 'add_slot', 'click', 'empty_slot')
+            } catch (e) {
+                console.error('Google Analytics error: ', e)
+            }
+        }
     }
 
     removeSlot = index => {
@@ -286,7 +297,15 @@ class App extends React.Component {
     }
 
     addBreak = () => {
-        this.addSlot({ time: 5, desc: 'Break' })
+        const time = 5
+
+        this.addSlot({ time, desc: 'Break' }, true)
+
+        try {
+            ga('send', 'event', 'add_slot', 'click', 'break', time)
+        } catch (e) {
+            console.error('Google Analytics error: ', e)
+        }
     }
 
     reorderSlots = ({ oldIndex, newIndex }) => {
@@ -311,6 +330,12 @@ class App extends React.Component {
         newState.results = this.getResults(newState.slots).results
 
         this.setState(newState)
+
+        try {
+            ga('send', 'event', 'preference', 'change', name, evt.target.checked ? 1 : 0)
+        } catch (e) {
+            console.error('Google Analytics error: ', e)
+        }
     }
 
     render() {
@@ -383,23 +408,40 @@ class App extends React.Component {
                         </label>
                     </div>
                 </div>
-                <button
-                    type="button"
-                    className="btn btn-success"
-                    onClick={() => this.copyToClipboard(this.getResultsAsText(results))}
-                >
-                    Copy as plain text (Outlook)
-                </button>
-                <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => this.copyToClipboard(this.getResultsAsConfluence(results))}
-                >
-                    Copy as Confluence table
-                </button>
-                <button type="button" className="btn btn-outline-success" onClick={this.copyUrl}>
-                    Copy link
-                </button>
+                <div className="row" style={{ marginBottom: '1em' }}>
+                    <div className="col">
+                        <button
+                            type="button"
+                            className="btn btn-success"
+                            onClick={() => {
+                                this.copyToClipboard(this.getResultsAsText(results))
+                                ga('send', 'event', 'button', 'click', 'plain_text')
+                            }}
+                        >
+                            Copy as plain text (Outlook)
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => {
+                                this.copyToClipboard(this.getResultsAsConfluence(results))
+                                ga('send', 'event', 'button', 'click', 'confluence_table')
+                            }}
+                        >
+                            Copy as Confluence table
+                        </button>
+                        <button type="button" className="btn btn-outline-success" onClick={this.copyUrl}>
+                            Copy link
+                        </button>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col">
+                        <p>
+                            <a href="https://github.com/patik/agenda-creator/issues/new">Report an issue</a>
+                        </p>
+                    </div>
+                </div>
             </div>
         )
     }
