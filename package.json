@@ -5,16 +5,16 @@
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
-    "array-move": "2.1.0",
-    "bootstrap": "4.3.1",
+    "array-move": "2.2.1",
+    "bootstrap": "4.4.1",
     "jquery": "3.4.1",
     "moment": "2.24.0",
     "popper.js": "1.15.0",
-    "react": "16.8.6",
-    "react-dom": "16.8.6",
-    "react-scripts": "3.0.1",
-    "react-sortable-hoc": "1.10.1",
-    "styled-components": "4.4.0"
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "react-scripts": "3.4.1",
+    "react-sortable-hoc": "1.11.0",
+    "styled-components": "5.0.1"
   },
   "devDependencies": {
     "typescript": "3.3.3"
