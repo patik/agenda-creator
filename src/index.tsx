@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
-import * as packageInfo from '../package.json'
+import packageInfo from '../package.json'
 
 const container = document.getElementById('root')
 const root = createRoot(container!)
