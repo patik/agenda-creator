@@ -2,9 +2,9 @@ import * as React from 'react'
 import moment from 'moment'
 import arrayMove from 'array-move'
 
-import TimeSlots from './TimeSlots.js'
-import Result from './Result.tsx'
-import StartTime from './StartTime.js'
+import TimeSlots from './TimeSlots'
+import Result from './Result'
+import StartTime from './StartTime'
 
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import './styles.css'
