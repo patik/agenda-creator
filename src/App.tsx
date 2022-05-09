@@ -46,8 +46,12 @@ class App extends React.Component {
 
             this.setState(newState)
 
-            if (ga) {
+            try {
                 ga('send', 'event', 'hash', 'applied')
+            } catch (e) {
+                if (window.debugAgendaCreator) {
+                    console.error('Google Analytics error: ', e)
+                }
             }
         } catch (e) {
             if (window.debugAgendaCreator) {
@@ -85,8 +89,12 @@ class App extends React.Component {
 
             this.copyToClipboard(url)
 
-            if (ga) {
+            try {
                 ga('send', 'event', 'button', 'click', 'copy_url')
+            } catch (e) {
+                if (window.debugAgendaCreator) {
+                    console.error('Google Analytics error: ', e)
+                }
             }
         } catch (e) {
             if (window.debugAgendaCreator) {
@@ -281,7 +289,9 @@ class App extends React.Component {
             try {
                 ga('send', 'event', 'add_slot', 'click', 'empty_slot')
             } catch (e) {
-                // console.error('Google Analytics error: ', e)
+                if (window.debugAgendaCreator) {
+                    console.error('Google Analytics error: ', e)
+                }
             }
         }
     }
@@ -307,11 +317,11 @@ class App extends React.Component {
         this.addSlot({ time, desc: 'Break' }, true)
 
         try {
-            if (ga) {
-                ga('send', 'event', 'add_slot', 'click', 'break', time)
-            }
+            ga('send', 'event', 'add_slot', 'click', 'break', time)
         } catch (e) {
-            console.error('Google Analytics error: ', e)
+            if (window.debugAgendaCreator) {
+                console.error('Google Analytics error: ', e)
+            }
         }
     }
 
@@ -342,11 +352,11 @@ class App extends React.Component {
         this.setState(newState)
 
         try {
-            if (ga) {
-                ga('send', 'event', 'preference', 'change', name, evt.target.checked ? 1 : 0)
-            }
+            ga('send', 'event', 'preference', 'change', name, evt.target.checked ? 1 : 0)
         } catch (e) {
-            console.error('Google Analytics error: ', e)
+            if (window.debugAgendaCreator) {
+                console.error('Google Analytics error: ', e)
+            }
         }
     }
 
@@ -426,8 +436,13 @@ class App extends React.Component {
                             className="btn btn-success"
                             onClick={() => {
                                 this.copyToClipboard(this.getResultsAsText(results))
-                                if (ga) {
+
+                                try {
                                     ga('send', 'event', 'button', 'click', 'plain_text')
+                                } catch (e) {
+                                    if (window.debugAgendaCreator) {
+                                        console.error('Google Analytics error: ', e)
+                                    }
                                 }
                             }}
                         >
@@ -438,8 +453,13 @@ class App extends React.Component {
                             className="btn btn-secondary"
                             onClick={() => {
                                 this.copyToClipboard(this.getResultsAsConfluence(results))
-                                if (ga) {
+
+                                try {
                                     ga('send', 'event', 'button', 'click', 'confluence_table')
+                                } catch (e) {
+                                    if (window.debugAgendaCreator) {
+                                        console.error('Google Analytics error: ', e)
+                                    }
                                 }
                             }}
                         >
