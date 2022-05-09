@@ -1,6 +1,6 @@
 import React, { ChangeEvent } from 'react'
 import moment, { Moment } from 'moment'
-import arrayMove from 'array-move'
+import { arrayMoveImmutable } from 'array-move'
 
 import TimeSlots from './TimeSlots'
 import DisplayResult from './Result'
@@ -8,7 +8,7 @@ import StartTime from './StartTime'
 
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import './styles.css'
-import { Prefs, Slot, State, Result } from '.'
+import { Prefs, Slot, State, Result } from './types'
 
 const getRandomInt = () => Math.floor(Math.random() * Math.floor(1000))
 
@@ -328,7 +328,7 @@ class App extends React.Component {
     reorderSlots = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
         if (oldIndex !== newIndex) {
             this.setState(({ slots }: { slots: Slot[] }) => {
-                const newOrder = arrayMove(slots, oldIndex, newIndex)
+                const newOrder = arrayMoveImmutable(slots, oldIndex, newIndex)
 
                 return {
                     slots: newOrder,

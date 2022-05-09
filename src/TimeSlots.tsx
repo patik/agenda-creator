@@ -1,7 +1,7 @@
 import React, { ChangeEventHandler, KeyboardEventHandler, KeyboardEvent } from 'react'
 import styled from 'styled-components'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
-import { Slot } from '.'
+import { Slot } from './types'
 
 const StyledForm = styled.form``
 

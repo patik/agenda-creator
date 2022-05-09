@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import { Result } from '.'
+import { Result } from './types'
 
 const StyledOutput = styled.div`
     font-family: dm, Menlo, Monaco, 'Courier New', monospace;

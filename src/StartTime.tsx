@@ -5,9 +5,7 @@ const StyledLabel = styled.label`
     margin-right: 0.5em;
 `
 
-const StyledInput = styled.input`
-    width: 120px;
-`
+const StyledInput = styled.input``
 
 function StartTime(props: { time: string; updateTime: (val: string) => void }) {
     const updateTime = (val: string) => {
@@ -36,7 +34,7 @@ function StartTime(props: { time: string; updateTime: (val: string) => void }) {
             <StyledLabel htmlFor="startTime">Start time:</StyledLabel>
             <StyledInput
                 type="time"
-                className="form-control form-control-inline"
+                className="form-control-inline"
                 value={time}
                 id="startTime"
                 onChange={(evt) => updateTime(evt.target.value)}
