@@ -1,5 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
+import { Result } from './types'
 
 const StyledOutput = styled.div`
     font-family: dm, Menlo, Monaco, 'Courier New', monospace;
@@ -8,16 +9,16 @@ const StyledOutput = styled.div`
     margin-left: 0 !important;
 `
 
-const Result = ({ results }) => (
+const DisplayResult = ({ results }: { results: Result[] }) => (
     <StyledOutput className="rounded border border-info">
-        {results.map(result => (
+        {results.map((result) => (
             <div key={result.key}>{result.text}</div>
         ))}
     </StyledOutput>
 )
 
-Result.defaultProps = {
+DisplayResult.defaultProps = {
     count: 1,
 }
 
-export default Result
+export default DisplayResult

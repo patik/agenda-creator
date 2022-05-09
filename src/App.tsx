@@ -1,20 +1,19 @@
-/* global ga: true */
-import * as React from 'react'
-import ReactDOM from 'react-dom'
-import moment from 'moment'
-import arrayMove from 'array-move'
+import React, { ChangeEvent } from 'react'
+import moment, { Moment } from 'moment'
+import { arrayMoveImmutable } from 'array-move'
 
-import TimeSlots from './TimeSlots.js'
-import Result from './Result.js'
-import StartTime from './StartTime.js'
+import TimeSlots from './TimeSlots'
+import DisplayResult from './Result'
+import StartTime from './StartTime'
 
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import './styles.css'
+import { Prefs, Slot, State, Result } from './types'
 
 const getRandomInt = () => Math.floor(Math.random() * Math.floor(1000))
 
 class App extends React.Component {
-    state = {
+    state: State = {
         slots: [],
         start: '',
         elapsed: 0,
@@ -35,18 +34,25 @@ class App extends React.Component {
         }
     }
 
-    applyHash = hash => {
+    applyHash = (hash: string) => {
         try {
             const { slots, start } = JSON.parse(hash)
-            const newState = { ...this.state, slots, start }
+            const newState: State = { ...this.state, slots, start }
 
             // Re-add the data that was left out of the URL
-            newState.slots.map(slot => ({
+            newState.slots.map(() => ({
                 id: getRandomInt(),
             }))
 
             this.setState(newState)
-            ga('send', 'event', 'hash', 'applied')
+
+            try {
+                ga('send', 'event', 'hash', 'applied')
+            } catch (e) {
+                if (window.debugAgendaCreator) {
+                    console.error('Google Analytics error: ', e)
+                }
+            }
         } catch (e) {
             if (window.debugAgendaCreator) {
                 console.error('Applying the hash failed with error ', e, '\nCurrent state: ', { ...this.state })
@@ -54,7 +60,7 @@ class App extends React.Component {
         }
     }
 
-    copyToClipboard = str => {
+    copyToClipboard = (str: string) => {
         const el = document.createElement('textarea')
         el.value = str
         el.setAttribute('readonly', '')
@@ -74,7 +80,7 @@ class App extends React.Component {
             }
 
             // Only keep the data we need (e.g. no IDs)
-            slimState.slots.map(slot => ({
+            slimState.slots.map((slot) => ({
                 time: slot.time,
                 desc: slot.desc,
             }))
@@ -82,7 +88,14 @@ class App extends React.Component {
             const url = `${window.location.origin}/#${encodeURIComponent(JSON.stringify(slimState))}`
 
             this.copyToClipboard(url)
-            ga('send', 'event', 'button', 'click', 'copy_url')
+
+            try {
+                ga('send', 'event', 'button', 'click', 'copy_url')
+            } catch (e) {
+                if (window.debugAgendaCreator) {
+                    console.error('Google Analytics error: ', e)
+                }
+            }
         } catch (e) {
             if (window.debugAgendaCreator) {
                 console.error('Copying URL to clipboard failed with error ', e, '\nCurrent state: ', { ...this.state })
@@ -90,7 +103,7 @@ class App extends React.Component {
         }
     }
 
-    minToHourMin = total => {
+    minToHourMin = (total: number) => {
         // Setting a default value above wouldn't take care of NaN
         if (isNaN(total)) {
             total = 0
@@ -113,10 +126,10 @@ class App extends React.Component {
         return `${hoursText}, ${minsText}`
     }
 
-    getEndTimeText = end => `-${end.format('HH:mm')}`
+    getEndTimeText = (end: Moment) => `-${end.format('HH:mm')}`
 
     // Arguments are optional
-    getResults = (slots, prefs) => {
+    getResults = (slots?: Slot[], prefs?: Prefs) => {
         if (!slots) {
             slots = this.state.slots
         }
@@ -129,10 +142,10 @@ class App extends React.Component {
         const { duration: showDuration, time: showTime } = prefs
         const startTime = moment(`2000-01-01T${start ? start : '09:00'}:00`)
 
-        const results = []
+        const results: Result[] = []
         let elapsed = 0
 
-        slots.forEach(entry => {
+        slots.forEach((entry) => {
             const begin = moment(startTime).add(elapsed, 'minutes')
             const end = moment(begin).add(entry.time, 'minutes')
             const key = `result_${entry.id}`
@@ -166,9 +179,9 @@ class App extends React.Component {
         return { results, elapsed }
     }
 
-    getResultsAsText = results => results.map(result => result.text).join('\n')
+    getResultsAsText = (results: Result[]) => results.map((result) => result.text).join('\n')
 
-    getResultsAsConfluence = results => {
+    getResultsAsConfluence = (results: Result[]) => {
         const {
             prefs: { duration: showDuration, time: showTime },
         } = this.state
@@ -184,9 +197,9 @@ class App extends React.Component {
 
         headerRow += 'Description||Person||'
 
-        let bodyRows = []
+        let bodyRows: string[] = []
 
-        results.forEach(result => {
+        results.forEach((result) => {
             let rowText = '|'
 
             if (showTime) {
@@ -205,7 +218,7 @@ class App extends React.Component {
         return `${headerRow}\n${bodyRows.join('\n')}`
     }
 
-    updateStartTime = val => {
+    updateStartTime = (val: string) => {
         const newState = {
             ...this.state,
         }
@@ -220,7 +233,7 @@ class App extends React.Component {
         this.setState(newState)
     }
 
-    updateSlotValue = (row, name, val) => {
+    updateSlotValue = (row: number, name: string, val: string | number) => {
         const newState = {
             ...this.state,
         }
@@ -239,31 +252,31 @@ class App extends React.Component {
         this.setState(newState)
     }
 
-    updateSlotTime = (row, val) => {
-        this.updateSlotValue(row, 'time', parseInt(val, 10))
+    updateSlotTime = (row: number, val: string) => {
+        this.updateSlotValue(row, 'time', parseInt(val.toString(), 10))
     }
 
-    updateSlotDesc = (row, val) => {
+    updateSlotDesc = (row: number, val: string) => {
         this.updateSlotValue(row, 'desc', val)
     }
 
-    addSlot = (entry = {}, doNotTrack = false) => {
+    addSlot = (entry?: Partial<Slot>, doNotTrack = false) => {
         const newState = {
             ...this.state,
         }
 
-        if (!entry.time) {
-            entry.time = 0
+        if (!entry) {
+            entry = { time: 0, desc: '' }
         }
 
-        if (!entry.desc) {
-            entry.desc = ''
-        }
-
-        newState.slots.push({
+        const newSlot: Slot = {
+            time: 0,
+            desc: '',
             ...entry,
             id: getRandomInt(),
-        })
+        }
+
+        newState.slots.push(newSlot)
 
         const { results, elapsed } = this.getResults(newState.slots)
 
@@ -276,12 +289,14 @@ class App extends React.Component {
             try {
                 ga('send', 'event', 'add_slot', 'click', 'empty_slot')
             } catch (e) {
-                console.error('Google Analytics error: ', e)
+                if (window.debugAgendaCreator) {
+                    console.error('Google Analytics error: ', e)
+                }
             }
         }
     }
 
-    removeSlot = index => {
+    removeSlot = (index: number) => {
         const newState = {
             ...this.state,
         }
@@ -304,14 +319,16 @@ class App extends React.Component {
         try {
             ga('send', 'event', 'add_slot', 'click', 'break', time)
         } catch (e) {
-            console.error('Google Analytics error: ', e)
+            if (window.debugAgendaCreator) {
+                console.error('Google Analytics error: ', e)
+            }
         }
     }
 
-    reorderSlots = ({ oldIndex, newIndex }) => {
+    reorderSlots = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
         if (oldIndex !== newIndex) {
-            this.setState(({ slots }) => {
-                const newOrder = arrayMove(slots, oldIndex, newIndex)
+            this.setState(({ slots }: { slots: Slot[] }) => {
+                const newOrder = arrayMoveImmutable(slots, oldIndex, newIndex)
 
                 return {
                     slots: newOrder,
@@ -321,10 +338,13 @@ class App extends React.Component {
         }
     }
 
-    updatePref = (name, evt) => {
-        const newState = { ...this.state }
+    updatePref = (name: 'time' | 'duration', evt: ChangeEvent<HTMLInputElement>) => {
+        const newState: State = { ...this.state }
 
-        newState.prefs[name] = evt.target.checked
+        newState.prefs = {
+            ...newState.prefs,
+            [name]: evt.target.checked,
+        }
 
         // Get a fresh set of results with the preferences applied
         newState.results = this.getResults(newState.slots).results
@@ -334,7 +354,9 @@ class App extends React.Component {
         try {
             ga('send', 'event', 'preference', 'change', name, evt.target.checked ? 1 : 0)
         } catch (e) {
-            console.error('Google Analytics error: ', e)
+            if (window.debugAgendaCreator) {
+                console.error('Google Analytics error: ', e)
+            }
         }
     }
 
@@ -359,7 +381,6 @@ class App extends React.Component {
                     slots={slots}
                     updateTime={this.updateSlotTime}
                     updateDesc={this.updateSlotDesc}
-                    elapsed={elapsed}
                     removeSlot={this.removeSlot}
                     reorderSlots={this.reorderSlots}
                     addSlot={this.addSlot}
@@ -376,7 +397,7 @@ class App extends React.Component {
                 </button>
 
                 <h2 className="mt-4">Result</h2>
-                <Result start={start} results={results} />
+                <DisplayResult results={results} />
 
                 <div className="container" style={{ marginBottom: '1em' }}>
                     <div className="form-check">
@@ -385,7 +406,7 @@ class App extends React.Component {
                             type="checkbox"
                             id="pref-time"
                             defaultChecked={prefs.time}
-                            onChange={evt => {
+                            onChange={(evt) => {
                                 this.updatePref('time', evt)
                             }}
                         />
@@ -399,7 +420,7 @@ class App extends React.Component {
                             type="checkbox"
                             id="pref-duration"
                             defaultChecked={prefs.duration}
-                            onChange={evt => {
+                            onChange={(evt) => {
                                 this.updatePref('duration', evt)
                             }}
                         />
@@ -415,7 +436,14 @@ class App extends React.Component {
                             className="btn btn-success"
                             onClick={() => {
                                 this.copyToClipboard(this.getResultsAsText(results))
-                                ga('send', 'event', 'button', 'click', 'plain_text')
+
+                                try {
+                                    ga('send', 'event', 'button', 'click', 'plain_text')
+                                } catch (e) {
+                                    if (window.debugAgendaCreator) {
+                                        console.error('Google Analytics error: ', e)
+                                    }
+                                }
                             }}
                         >
                             Copy as plain text (Outlook)
@@ -425,7 +453,14 @@ class App extends React.Component {
                             className="btn btn-secondary"
                             onClick={() => {
                                 this.copyToClipboard(this.getResultsAsConfluence(results))
-                                ga('send', 'event', 'button', 'click', 'confluence_table')
+
+                                try {
+                                    ga('send', 'event', 'button', 'click', 'confluence_table')
+                                } catch (e) {
+                                    if (window.debugAgendaCreator) {
+                                        console.error('Google Analytics error: ', e)
+                                    }
+                                }
                             }}
                         >
                             Copy as Confluence table
@@ -447,6 +482,4 @@ class App extends React.Component {
     }
 }
 
-const rootElement = document.getElementById('root')
-
-ReactDOM.render(<App />, rootElement)
+export default App
