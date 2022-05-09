@@ -3,7 +3,11 @@ import styled from 'styled-components'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { Slot } from '.'
 
-const Wrapper = styled.form``
+const StyledForm = styled.form``
+
+const Row = styled.div`
+    display: flex;
+`
 
 const Label = styled.label`
     margin-right: 0.5em;
@@ -35,14 +39,11 @@ type TimeSlotItemProps = {
 const TimeSlotItem = SortableElement<TimeSlotItemProps>(
     ({ timeslot, i, callWithRow, updateTime, updateDesc, removeSlot, addSlot }: TimeSlotItemProps) => {
         const addSlotOnEnter: KeyboardEventHandler<HTMLInputElement> = (evt: KeyboardEvent<HTMLInputElement>) =>
-            evt.which === 13 ? addSlot() : 0
+            evt.key === 'Enter' ? addSlot() : 0
 
         return (
-            <div className="timeslot-item form-row mb-2 align-items-center form-group" key={`${timeslot.id}`}>
+            <Row className="timeslot-item mb-2 align-items-center form-floating row" key={`${timeslot.id}`}>
                 <div className="col-auto">
-                    <Label className="sr-only" htmlFor={`${timeslot.id}_time`}>
-                        Duration in minutes
-                    </Label>
                     <NumberInput
                         type="number"
                         className="form-control mb-2"
@@ -55,9 +56,12 @@ const TimeSlotItem = SortableElement<TimeSlotItemProps>(
                         min="0"
                         step="5"
                     />
+                    <Label className="visually-hidden" htmlFor={`${timeslot.id}_time`}>
+                        Duration in minutes
+                    </Label>
                 </div>
                 <DescriptionColumn className="col-auto">
-                    <Label className="sr-only" htmlFor={`${timeslot.id}_desc`}>
+                    <Label className="visually-hidden" htmlFor={`${timeslot.id}_desc`}>
                         Description
                     </Label>
                     <DescInput
@@ -75,7 +79,7 @@ const TimeSlotItem = SortableElement<TimeSlotItemProps>(
                         Remove
                     </button>
                 </div>
-            </div>
+            </Row>
         )
     },
 )
@@ -83,11 +87,11 @@ const TimeSlotItem = SortableElement<TimeSlotItemProps>(
 type TimeSlotListProps = Omit<TimeSlotItemProps, 'timeslot' | 'i'>
 
 const TimeSlotList = SortableContainer<TimeSlotListProps>((props: TimeSlotListProps) => (
-    <Wrapper>
+    <StyledForm>
         {props.slots.map((timeslot, index) => (
             <TimeSlotItem {...props} key={`item-${timeslot.id}`} timeslot={timeslot} index={index} i={index} />
         ))}
-    </Wrapper>
+    </StyledForm>
 ))
 
 type Indices = { oldIndex: number; newIndex: number }

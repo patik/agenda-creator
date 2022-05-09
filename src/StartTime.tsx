@@ -6,7 +6,7 @@ const StyledLabel = styled.label`
 `
 
 const StyledInput = styled.input`
-    width: 80px;
+    width: 120px;
 `
 
 function StartTime(props: { time: string; updateTime: (val: string) => void }) {
