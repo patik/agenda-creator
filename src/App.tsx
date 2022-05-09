@@ -12,8 +12,6 @@ import { Prefs, Slot, State, Result } from '.'
 
 const getRandomInt = () => Math.floor(Math.random() * Math.floor(1000))
 
-const ga = window ? window.ga : () => ({})
-
 class App extends React.Component {
     state: State = {
         slots: [],
@@ -49,9 +47,7 @@ class App extends React.Component {
             this.setState(newState)
 
             if (ga) {
-                if (ga) {
-                    ga('send', 'event', 'hash', 'applied')
-                }
+                ga('send', 'event', 'hash', 'applied')
             }
         } catch (e) {
             if (window.debugAgendaCreator) {
@@ -88,6 +84,7 @@ class App extends React.Component {
             const url = `${window.location.origin}/#${encodeURIComponent(JSON.stringify(slimState))}`
 
             this.copyToClipboard(url)
+
             if (ga) {
                 ga('send', 'event', 'button', 'click', 'copy_url')
             }
@@ -282,11 +279,9 @@ class App extends React.Component {
 
         if (!doNotTrack) {
             try {
-                if (ga) {
-                    ga('send', 'event', 'add_slot', 'click', 'empty_slot')
-                }
+                ga('send', 'event', 'add_slot', 'click', 'empty_slot')
             } catch (e) {
-                console.error('Google Analytics error: ', e)
+                // console.error('Google Analytics error: ', e)
             }
         }
     }
@@ -334,9 +329,12 @@ class App extends React.Component {
     }
 
     updatePref = (name: 'time' | 'duration', evt: ChangeEvent<HTMLInputElement>) => {
-        const newState = { ...this.state }
+        const newState: State = { ...this.state }
 
-        newState.prefs[name] = evt.target.checked
+        newState.prefs = {
+            ...newState.prefs,
+            [name]: evt.target.checked,
+        }
 
         // Get a fresh set of results with the preferences applied
         newState.results = this.getResults(newState.slots).results

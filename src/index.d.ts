@@ -1,8 +1,12 @@
-// declare module 'ga'
-
 import { Moment } from 'moment'
 
-type Json = string | number | boolean | null | { [property: string]: Json } | Json[]
+// type Json = string | number | boolean | null | { [property: string]: Json } | Json[]
+
+declare global {
+    interface Window {
+        debugAgendaCreator: any
+    }
+}
 
 type Slot = {
     id: number
