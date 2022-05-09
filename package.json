@@ -35,5 +35,8 @@
         "not ie <= 11",
         "not op_mini all"
     ],
-    "license": "ISC"
+    "license": "ISC",
+    "devDependencies": {
+        "@babel/helper-call-delegate": "^7.12.13"
+    }
 }
