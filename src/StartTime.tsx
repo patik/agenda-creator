@@ -9,7 +9,7 @@ const StyledInput = styled.input`
     width: 80px;
 `
 
-function StartTime(props: { time: number; updateTime: (val: string) => void }) {
+function StartTime(props: { time: string; updateTime: (val: string) => void }) {
     const updateTime = (val: string) => {
         const { updateTime } = props
 

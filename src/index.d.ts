@@ -2,6 +2,8 @@
 
 import { Moment } from 'moment'
 
+type Json = string | number | boolean | null | { [property: string]: Json } | Json[]
+
 type Slot = {
     id: number
     time: number

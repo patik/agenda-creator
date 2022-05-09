@@ -1,20 +1,21 @@
-import * as React from 'react'
-import moment from 'moment'
+import React, { ChangeEvent } from 'react'
+import moment, { Moment } from 'moment'
 import arrayMove from 'array-move'
 
 import TimeSlots from './TimeSlots'
-import Result from './Result'
+import DisplayResult from './Result'
 import StartTime from './StartTime'
 
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import './styles.css'
+import { Prefs, Slot, State, Result } from '.'
 
 const getRandomInt = () => Math.floor(Math.random() * Math.floor(1000))
 
 const ga = window ? window.ga : () => ({})
 
 class App extends React.Component {
-    state = {
+    state: State = {
         slots: [],
         start: '',
         elapsed: 0,
@@ -35,18 +36,23 @@ class App extends React.Component {
         }
     }
 
-    applyHash = (hash) => {
+    applyHash = (hash: string) => {
         try {
             const { slots, start } = JSON.parse(hash)
-            const newState = { ...this.state, slots, start }
+            const newState: State = { ...this.state, slots, start }
 
             // Re-add the data that was left out of the URL
-            newState.slots.map((slot) => ({
+            newState.slots.map(() => ({
                 id: getRandomInt(),
             }))
 
             this.setState(newState)
-            ga('send', 'event', 'hash', 'applied')
+
+            if (ga) {
+                if (ga) {
+                    ga('send', 'event', 'hash', 'applied')
+                }
+            }
         } catch (e) {
             if (window.debugAgendaCreator) {
                 console.error('Applying the hash failed with error ', e, '\nCurrent state: ', { ...this.state })
@@ -54,7 +60,7 @@ class App extends React.Component {
         }
     }
 
-    copyToClipboard = (str) => {
+    copyToClipboard = (str: string) => {
         const el = document.createElement('textarea')
         el.value = str
         el.setAttribute('readonly', '')
@@ -82,7 +88,9 @@ class App extends React.Component {
             const url = `${window.location.origin}/#${encodeURIComponent(JSON.stringify(slimState))}`
 
             this.copyToClipboard(url)
-            ga('send', 'event', 'button', 'click', 'copy_url')
+            if (ga) {
+                ga('send', 'event', 'button', 'click', 'copy_url')
+            }
         } catch (e) {
             if (window.debugAgendaCreator) {
                 console.error('Copying URL to clipboard failed with error ', e, '\nCurrent state: ', { ...this.state })
@@ -90,7 +98,7 @@ class App extends React.Component {
         }
     }
 
-    minToHourMin = (total) => {
+    minToHourMin = (total: number) => {
         // Setting a default value above wouldn't take care of NaN
         if (isNaN(total)) {
             total = 0
@@ -113,10 +121,10 @@ class App extends React.Component {
         return `${hoursText}, ${minsText}`
     }
 
-    getEndTimeText = (end) => `-${end.format('HH:mm')}`
+    getEndTimeText = (end: Moment) => `-${end.format('HH:mm')}`
 
     // Arguments are optional
-    getResults = (slots, prefs) => {
+    getResults = (slots?: Slot[], prefs?: Prefs) => {
         if (!slots) {
             slots = this.state.slots
         }
@@ -129,7 +137,7 @@ class App extends React.Component {
         const { duration: showDuration, time: showTime } = prefs
         const startTime = moment(`2000-01-01T${start ? start : '09:00'}:00`)
 
-        const results = []
+        const results: Result[] = []
         let elapsed = 0
 
         slots.forEach((entry) => {
@@ -166,9 +174,9 @@ class App extends React.Component {
         return { results, elapsed }
     }
 
-    getResultsAsText = (results) => results.map((result) => result.text).join('\n')
+    getResultsAsText = (results: Result[]) => results.map((result) => result.text).join('\n')
 
-    getResultsAsConfluence = (results) => {
+    getResultsAsConfluence = (results: Result[]) => {
         const {
             prefs: { duration: showDuration, time: showTime },
         } = this.state
@@ -184,7 +192,7 @@ class App extends React.Component {
 
         headerRow += 'Description||Person||'
 
-        let bodyRows = []
+        let bodyRows: string[] = []
 
         results.forEach((result) => {
             let rowText = '|'
@@ -205,7 +213,7 @@ class App extends React.Component {
         return `${headerRow}\n${bodyRows.join('\n')}`
     }
 
-    updateStartTime = (val) => {
+    updateStartTime = (val: string) => {
         const newState = {
             ...this.state,
         }
@@ -220,7 +228,7 @@ class App extends React.Component {
         this.setState(newState)
     }
 
-    updateSlotValue = (row, name, val) => {
+    updateSlotValue = (row: number, name: string, val: string | number) => {
         const newState = {
             ...this.state,
         }
@@ -239,31 +247,31 @@ class App extends React.Component {
         this.setState(newState)
     }
 
-    updateSlotTime = (row, val) => {
-        this.updateSlotValue(row, 'time', parseInt(val, 10))
+    updateSlotTime = (row: number, val: string) => {
+        this.updateSlotValue(row, 'time', parseInt(val.toString(), 10))
     }
 
-    updateSlotDesc = (row, val) => {
+    updateSlotDesc = (row: number, val: string) => {
         this.updateSlotValue(row, 'desc', val)
     }
 
-    addSlot = (entry = {}, doNotTrack = false) => {
+    addSlot = (entry?: Partial<Slot>, doNotTrack = false) => {
         const newState = {
             ...this.state,
         }
 
-        if (!entry.time) {
-            entry.time = 0
+        if (!entry) {
+            entry = { time: 0, desc: '' }
         }
 
-        if (!entry.desc) {
-            entry.desc = ''
-        }
-
-        newState.slots.push({
+        const newSlot: Slot = {
+            time: 0,
+            desc: '',
             ...entry,
             id: getRandomInt(),
-        })
+        }
+
+        newState.slots.push(newSlot)
 
         const { results, elapsed } = this.getResults(newState.slots)
 
@@ -274,14 +282,16 @@ class App extends React.Component {
 
         if (!doNotTrack) {
             try {
-                ga('send', 'event', 'add_slot', 'click', 'empty_slot')
+                if (ga) {
+                    ga('send', 'event', 'add_slot', 'click', 'empty_slot')
+                }
             } catch (e) {
                 console.error('Google Analytics error: ', e)
             }
         }
     }
 
-    removeSlot = (index) => {
+    removeSlot = (index: number) => {
         const newState = {
             ...this.state,
         }
@@ -302,15 +312,17 @@ class App extends React.Component {
         this.addSlot({ time, desc: 'Break' }, true)
 
         try {
-            ga('send', 'event', 'add_slot', 'click', 'break', time)
+            if (ga) {
+                ga('send', 'event', 'add_slot', 'click', 'break', time)
+            }
         } catch (e) {
             console.error('Google Analytics error: ', e)
         }
     }
 
-    reorderSlots = ({ oldIndex, newIndex }) => {
+    reorderSlots = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
         if (oldIndex !== newIndex) {
-            this.setState(({ slots }) => {
+            this.setState(({ slots }: { slots: Slot[] }) => {
                 const newOrder = arrayMove(slots, oldIndex, newIndex)
 
                 return {
@@ -321,7 +333,7 @@ class App extends React.Component {
         }
     }
 
-    updatePref = (name, evt) => {
+    updatePref = (name: 'time' | 'duration', evt: ChangeEvent<HTMLInputElement>) => {
         const newState = { ...this.state }
 
         newState.prefs[name] = evt.target.checked
@@ -332,7 +344,9 @@ class App extends React.Component {
         this.setState(newState)
 
         try {
-            ga('send', 'event', 'preference', 'change', name, evt.target.checked ? 1 : 0)
+            if (ga) {
+                ga('send', 'event', 'preference', 'change', name, evt.target.checked ? 1 : 0)
+            }
         } catch (e) {
             console.error('Google Analytics error: ', e)
         }
@@ -359,7 +373,6 @@ class App extends React.Component {
                     slots={slots}
                     updateTime={this.updateSlotTime}
                     updateDesc={this.updateSlotDesc}
-                    elapsed={elapsed}
                     removeSlot={this.removeSlot}
                     reorderSlots={this.reorderSlots}
                     addSlot={this.addSlot}
@@ -376,7 +389,7 @@ class App extends React.Component {
                 </button>
 
                 <h2 className="mt-4">Result</h2>
-                <Result start={start} results={results} />
+                <DisplayResult results={results} />
 
                 <div className="container" style={{ marginBottom: '1em' }}>
                     <div className="form-check">
@@ -415,7 +428,9 @@ class App extends React.Component {
                             className="btn btn-success"
                             onClick={() => {
                                 this.copyToClipboard(this.getResultsAsText(results))
-                                ga('send', 'event', 'button', 'click', 'plain_text')
+                                if (ga) {
+                                    ga('send', 'event', 'button', 'click', 'plain_text')
+                                }
                             }}
                         >
                             Copy as plain text (Outlook)
@@ -425,7 +440,9 @@ class App extends React.Component {
                             className="btn btn-secondary"
                             onClick={() => {
                                 this.copyToClipboard(this.getResultsAsConfluence(results))
-                                ga('send', 'event', 'button', 'click', 'confluence_table')
+                                if (ga) {
+                                    ga('send', 'event', 'button', 'click', 'confluence_table')
+                                }
                             }}
                         >
                             Copy as Confluence table

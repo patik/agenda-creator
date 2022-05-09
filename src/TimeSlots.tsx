@@ -21,19 +21,19 @@ const DescriptionColumn = styled.div`
 
 const DescInput = styled.input``
 
-type Props = {
+type TimeSlotItemProps = {
     slots: Slot[]
     timeslot: Slot
     i: number
-    callWithRow: (row: number, callback: () => void) => ChangeEventHandler<HTMLInputElement>
-    updateTime: () => void
-    updateDesc: () => void
+    callWithRow: (row: number, callback: (row: number, val: string) => void) => ChangeEventHandler<HTMLInputElement>
+    updateTime: (row: number, val: string) => void
+    updateDesc: (row: number, val: string) => void
     removeSlot: (index: number) => void
-    addSlot: () => void
+    addSlot: (entry?: Partial<Slot>, doNotTrack?: boolean) => void
 }
 
-const TimeSlotItem = SortableElement<Props>(
-    ({ timeslot, i, callWithRow, updateTime, updateDesc, removeSlot, addSlot }: Props) => {
+const TimeSlotItem = SortableElement<TimeSlotItemProps>(
+    ({ timeslot, i, callWithRow, updateTime, updateDesc, removeSlot, addSlot }: TimeSlotItemProps) => {
         const addSlotOnEnter: KeyboardEventHandler<HTMLInputElement> = (evt: KeyboardEvent<HTMLInputElement>) =>
             evt.which === 13 ? addSlot() : 0
 
@@ -80,7 +80,9 @@ const TimeSlotItem = SortableElement<Props>(
     },
 )
 
-const TimeSlotList = SortableContainer<Props>((props: Props) => (
+type TimeSlotListProps = Omit<TimeSlotItemProps, 'timeslot' | 'i'>
+
+const TimeSlotList = SortableContainer<TimeSlotListProps>((props: TimeSlotListProps) => (
     <Wrapper>
         {props.slots.map((timeslot, index) => (
             <TimeSlotItem {...props} key={`item-${timeslot.id}`} timeslot={timeslot} index={index} i={index} />
@@ -89,11 +91,14 @@ const TimeSlotList = SortableContainer<Props>((props: Props) => (
 ))
 
 type Indices = { oldIndex: number; newIndex: number }
+type TimeSlotProps = {
+    reorderSlots: (indices: Indices) => void
+} & Omit<TimeSlotListProps, 'callWithRow'>
 
-function TimeSlots(props: { reorderSlots: (indices: Indices) => void } & Props) {
+function TimeSlots(props: TimeSlotProps) {
     const callWithRow = (
         row: number,
-        callback: (oldIndex: number, newIndex: number | string) => void,
+        callback: (oldIndex: number, newIndex: string) => void,
     ): ChangeEventHandler<HTMLInputElement> => (evt) => {
         callback(row, evt.target.value)
     }
